@@ -10,6 +10,8 @@ from rest_framework.response import Response
 class BoardViewSet(viewsets.ModelViewSet):
     queryset = Board.objects.all()
     serializer_class = BoardSerializer
+    def get_queryset(self):
+       return Board.objects.prefetch_related('lists__cards')
 
 # List View
 class  ListViewSet(viewsets.ModelViewSet):
