@@ -1,0 +1,18 @@
+<h2>{{ board?.name }}</h2>
+
+<div style="display: flex; gap: 20px;">
+
+  <div *ngFor="let list of board?.lists" cdkDropList [id]="'list-' + list.id" [cdkDropListData]="list.cards"
+    [cdkDropListConnectedTo]="connectedLists" (cdkDropListDropped)="drop($event, list)"
+    style="width: 220px; border: 1px solid gray; padding: 10px; border-radius: 6px;">
+
+    <h3>{{ list.name }}</h3>
+
+    <div *ngFor="let card of list.cards" cdkDrag
+      style="padding: 8px; margin: 6px 0; background: #eee; border-radius: 4px; cursor: grab;">
+      {{ card.title }}
+    </div>
+
+  </div>
+
+</div>
