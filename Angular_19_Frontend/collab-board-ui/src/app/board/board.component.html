@@ -1,16 +1,17 @@
-<h2>{{ board?.name }}</h2>
+<h2 style="color: #2c3e50; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.1);">{{ board?.name }}</h2>
 
-<div style="display: flex; gap: 20px;">
+<div style="display: flex; gap: 25px; padding: 10px;">
 
   <div *ngFor="let list of board?.lists" cdkDropList [id]="'list-' + list.id" [cdkDropListData]="list.cards"
     [cdkDropListConnectedTo]="connectedLists" (cdkDropListDropped)="drop($event, list)"
-    style="width: 220px; border: 1px solid gray; padding: 10px; border-radius: 6px;">
+    style="width: 220px; border: 2px solid #2c3e50; padding: 12px; border-radius: 0; background-color: #ecf0f1; box-shadow: 5px 5px 0px rgba(44, 62, 80, 0.2);">
 
-    <h3>{{ list.name }}</h3>
+    <h3 style="margin-top: 0; color: #34495e; border-bottom: 2px solid #bdc3c7; padding-bottom: 5px;">{{ list.name }}
+    </h3>
 
     <div *ngFor="let card of list.cards" cdkDrag
-      style="padding: 8px; margin: 6px 0; background: #eee; border-radius: 4px; cursor: grab;">
-      {{ card.title }}
+      style="padding: 10px; margin: 10px 0 0 0; background: #ffffff; border: 2px solid #2c3e50; border-left: 5px solid #3498db; border-radius: 0; cursor: grab; box-shadow: 3px 3px 0px rgba(44, 62, 80, 0.2);">
+      <span style="font-weight: 500; color: #2c3e50;">{{ card.title }}</span>
     </div>
 
   </div>
