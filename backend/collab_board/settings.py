@@ -39,6 +39,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -79,6 +80,7 @@ TEMPLATES = [
     },
 ]
 
+ASGI_APPLICATION = "collab_board.asgi.application"
 WSGI_APPLICATION = 'collab_board.wsgi.application'
 
 
@@ -129,7 +131,7 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 CORS_ALLOW_ALL_ORIGINS = True
-ASGI_APPLICATION = "collab_board.asgi.application"
+
 
 CHANNEL_LAYERS = {
     "default": {

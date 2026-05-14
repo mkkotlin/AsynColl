@@ -14,8 +14,10 @@ import boards.routing
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'collab_board.settings')
 
-# application = get_asgi_application()
 application = ProtocolTypeRouter({
-    "http":get_asgi_application(),
-    "websocket":URLRouter( boards.routing.websocket_urlpatterns)
+    "http": get_asgi_application(),
+    "websocket": URLRouter(
+        boards.routing.websocket_urlpatterns
+    ),
 })
+print('ASGI LOADED')
