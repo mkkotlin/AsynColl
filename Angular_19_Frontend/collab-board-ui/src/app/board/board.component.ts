@@ -18,6 +18,7 @@ export class BoardComponent implements OnInit, OnDestroy {
 
   board: any;
   connectedLists: string[] = [];
+  users: any[] = [];
   private socket!: WebSocket;
 
 constructor(private api: ApiService) {}
@@ -25,6 +26,7 @@ constructor(private api: ApiService) {}
   ngOnInit(): void {
     this.connectWebSocket();
     this.loadBoard();
+    this.loadUsers();
   }
 
   ngOnDestroy(): void {
@@ -41,13 +43,19 @@ constructor(private api: ApiService) {}
     });
   }
 
+  loadUsers(){
+    this.api.getUser().subscribe((data: any)=>{
+      this.users = data;
+    })
+  }
+
   connectWebSocket() {
     this.socket = new WebSocket('ws://127.0.0.1:8000/ws/board/1/');
 
     this.socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
 
-      if (data.action === 'CARD_MOVED') {
+      if (data.action === 'CARD_MOVED' || data.action === 'CARD_ASSIGNED') {
         this.loadBoard();
       }
     };
@@ -105,5 +113,21 @@ constructor(private api: ApiService) {}
 
       });
     }
+  }
+
+  assignUser(card: any, event: Event){
+    const select = event.target as HTMLSelectElement;
+    const userId = Number(select.value)
+    console.log('Assign clicked')
+    this.api.updateCard(card.id, {
+      assigned_to_id: userId
+    }).subscribe(()=>{
+      console.log('api response')
+      this.socket.send(JSON.stringify({
+        action: "CARD_ASSIGNED",
+        cardId: card.id,
+        userId: userId
+      }))
+    })
   }
 }

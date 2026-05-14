@@ -18,6 +18,19 @@
 
       {{ card.title }}
 
+      <!-- Assigned User -->
+  <small *ngIf="card.assigned_to">
+    Assigned: {{ card.assigned_to.username }}
+  </small>
+
+  <!-- Assign Dropdown -->
+  <select (change)="assignUser(card, $event)">
+    <option value="">-- Assign --</option>
+    <option *ngFor="let user of users" [value]="user.id">
+      {{ user.username }}
+    </option>
+  </select>
+
     </div>
 
   </div>

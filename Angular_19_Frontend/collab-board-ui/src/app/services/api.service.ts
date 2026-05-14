@@ -25,4 +25,7 @@ export class ApiService {
       { card_ids: cardIds }
     );
   }
+  getUser(){
+    return this.http.get(`${this.baseUrl}/users/`);
+  }
 }
