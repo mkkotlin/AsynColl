@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ApiService } from '../services/api.service';
+import { Router } from '@angular/router';
 import {
   DragDropModule,
   CdkDragDrop,
@@ -12,7 +13,8 @@ import { CommonModule } from '@angular/common';
   selector: 'app-board',
   standalone: true,
   imports: [DragDropModule, CommonModule],
-  templateUrl: './board.component.html'
+  templateUrl: './board.component.html',
+  styleUrl: './board.component.css'
 })
 export class BoardComponent implements OnInit, OnDestroy {
 
@@ -21,23 +23,12 @@ export class BoardComponent implements OnInit, OnDestroy {
   users: any[] = [];
   private socket!: WebSocket;
 
-constructor(private api: ApiService) {}
+  constructor(private api: ApiService, private router: Router) { }
 
   ngOnInit(): void {
-    // this.connectWebSocket();
-    // this.loadBoard();
-    // this.loadUsers();
-    this.api.login({
-      username: 'mayank',
-      password:'mayank'
-    }).subscribe((res: any)=>{
-      localStorage.setItem('access', res.access);
-      localStorage.setItem('refresh', res.refresh);
-      console.log('JWT stored');
-          this.connectWebSocket();
+    this.connectWebSocket();
     this.loadBoard();
     this.loadUsers();
-    })
   }
 
   ngOnDestroy(): void {
@@ -54,8 +45,8 @@ constructor(private api: ApiService) {}
     });
   }
 
-  loadUsers(){
-    this.api.getUser().subscribe((data: any)=>{
+  loadUsers() {
+    this.api.getUser().subscribe((data: any) => {
       this.users = data;
     })
   }
@@ -126,13 +117,13 @@ constructor(private api: ApiService) {}
     }
   }
 
-  assignUser(card: any, event: Event){
+  assignUser(card: any, event: Event) {
     const select = event.target as HTMLSelectElement;
     const userId = Number(select.value)
     console.log('Assign clicked')
     this.api.updateCard(card.id, {
       assigned_to_id: userId
-    }).subscribe(()=>{
+    }).subscribe(() => {
       console.log('api response')
       this.socket.send(JSON.stringify({
         action: "CARD_ASSIGNED",
@@ -141,4 +132,12 @@ constructor(private api: ApiService) {}
       }))
     })
   }
+  logout(){
+    localStorage.removeItem('access');
+    localStorage.removeItem('refresh');
+    this.socket.close();
+    this.router.navigate(['/login']);
+  }
+
+
 }

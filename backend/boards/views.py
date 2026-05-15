@@ -12,14 +12,14 @@ from rest_framework.decorators import api_view
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_class = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     
 
 
 class BoardViewSet(viewsets.ModelViewSet):
     queryset = Board.objects.all()
     serializer_class = BoardSerializer
-    permission_class = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         return Board.objects.prefetch_related('lists__cards', 'activities')
@@ -28,7 +28,7 @@ class BoardViewSet(viewsets.ModelViewSet):
 class ListViewSet(viewsets.ModelViewSet):
     queryset = List.objects.all()
     serializer_class = ListSerializer
-    permission_class = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     # 🔥 REORDER API
     @action(detail=True, methods=['post'])
@@ -44,7 +44,7 @@ class ListViewSet(viewsets.ModelViewSet):
 class CardViewSet(viewsets.ModelViewSet):
     queryset = Card.objects.all()
     serializer_class = CardSerializer
-    permission_class = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
 
     def partial_update(self, request, *args, **kwargs):

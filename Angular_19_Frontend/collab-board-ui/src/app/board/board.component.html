@@ -1,35 +1,54 @@
-<h2>{{ board?.name }}</h2>
+<div class="topbar">
+  <h1>{{ board?.name }}</h1>
 
-<div style="display: flex; gap: 20px;">
+  <button class="logout-btn" (click)="logout()">
+    Logout
+  </button>
+</div>
 
-  <div *ngFor="let list of board?.lists"
-       cdkDropList
-       [id]="'list-' + list.id"
-       [cdkDropListData]="list.cards"
-       [cdkDropListConnectedTo]="connectedLists"
-       (cdkDropListDropped)="drop($event, list)"
-       style="width: 250px; border: 1px solid gray; padding: 10px;">
+<div class="board-container">
+
+  <div
+    class="list"
+    *ngFor="let list of board?.lists"
+
+    cdkDropList
+    [id]="'list-' + list.id"
+    [cdkDropListData]="list.cards"
+    [cdkDropListConnectedTo]="connectedLists"
+    (cdkDropListDropped)="drop($event, list)"
+  >
 
     <h3>{{ list.name }}</h3>
 
-    <div *ngFor="let card of list.cards"
-         cdkDrag
-         style="padding: 10px; margin: 5px; background: #eee; cursor: grab;">
+    <div
+      class="card"
+      *ngFor="let card of list.cards"
+      cdkDrag
+    >
 
-      {{ card.title }}
+      <p class="card-title">
+        {{ card.title }}
+      </p>
 
-      <!-- Assigned User -->
-  <small *ngIf="card.assigned_to">
-    Assigned: {{ card.assigned_to.username }}
-  </small>
+      <small *ngIf="card.assigned_to">
+        Assigned: {{ card.assigned_to.username }}
+      </small>
 
-  <!-- Assign Dropdown -->
-  <select (change)="assignUser(card, $event)">
-    <option value="">-- Assign --</option>
-    <option *ngFor="let user of users" [value]="user.id">
-      {{ user.username }}
-    </option>
-  </select>
+      <select
+        class="assign-select"
+        (change)="assignUser(card, $any($event.target).value)"
+      >
+        <option value="">Assign User</option>
+
+        <option
+          *ngFor="let user of users"
+          [value]="user.id"
+        >
+          {{ user.username }}
+        </option>
+
+      </select>
 
     </div>
 
@@ -38,11 +57,26 @@
 </div>
 
 <hr>
-<h3>Activity Log</h3>
-<div *ngFor="let act of board?.activities">
-  <p>
-    <strong> {{ act.user?.username || 'Someone' }} </strong>
+
+<div class="activity-section">
+
+  <h2>Activity Log</h2>
+
+  <div
+    class="activity-item"
+    *ngFor="let act of board?.activities"
+  >
+
+    <strong>
+      {{ act.user?.username || 'Unknown' }}
+    </strong>
+
     {{ act.action }}
-    <small> ({{ act.created_at | date:'short' }}) </small>
-  </p>
+
+    <div class="timestamp">
+      {{ act.created_at | date:'short' }}
+    </div>
+
+  </div>
+
 </div>
