@@ -5,6 +5,8 @@ from .models import Board, List, Card, ActivityLog
 from .serializers import BoardSerializer, ListSerializer, CardSerializer, UserSerializer
 from django.contrib.auth.models import User
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import api_view
+
 
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
@@ -84,3 +86,16 @@ class CardViewSet(viewsets.ModelViewSet):
 
         serializer = self.get_serializer(card)
         return Response(serializer.data)
+    
+@api_view(['POST'])
+def register_user(request):
+    username = request.data.get('username')
+    password = request.data.get('password')
+
+    if User.objects.filter(username=username).exists():
+        return Response({"error": "Usermame already exists"},status = status.HTTP_400_BAB_REQUEST )
+    
+    user = User.objects.create_user(username=username, password=password)
+    return Response({"message":"User created successfully"})
+    
+    

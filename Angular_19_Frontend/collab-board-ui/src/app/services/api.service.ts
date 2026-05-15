@@ -32,4 +32,7 @@ export class ApiService {
   login(data:any){
     return this.http.post(`${this.baseUrl}/token/`, data);
   }
+  register(data: any){
+    return this.http.post(`${this.baseUrl}/register/`, data)
+  }
 }
