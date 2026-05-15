@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from boards.models import Board, List, Card
+from boards.models import Board, List, Card, ActivityLog
 from django.contrib.auth.models import User
 
 class UserSerializer(serializers.ModelSerializer):
@@ -19,9 +19,17 @@ class ListSerializer(serializers.ModelSerializer):
     class Meta:
         model = List
         fields = '__all__'  
-        
+
+class ActivityLogSerializer(serializers.ModelSerializer):
+    user = UserSerializer
+
+    class Meta:
+        model = ActivityLog
+        fields = '__all__'
+                
 class BoardSerializer(serializers.ModelSerializer):
     lists = ListSerializer(many=True, read_only=True)
+    activities = ActivityLogSerializer(many=True, read_only=True)
     class Meta:
         model = Board
         fields = '__all__'  

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from boards.models import Board, List, Card
+from boards.models import Board, List, Card, ActivityLog
 
 # Register your models here.
 # display card, list, board and its id and title
@@ -18,3 +18,7 @@ class ListAdmin(admin.ModelAdmin):
 @admin.register(Card)
 class CardAdmin(admin.ModelAdmin):
     list_display = ('id', 'title', 'list', 'position', 'assigned_to', 'created_at')
+
+@admin.register(ActivityLog)
+class ActivityLogAdmin(admin.ModelAdmin):
+    list_display = ('board', 'user', 'action', 'card', 'created_at')

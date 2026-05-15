@@ -36,3 +36,13 @@
   </div>
 
 </div>
+
+<hr>
+<h3>Activity Log</h3>
+<div *ngFor="let act of board?.activities">
+  <p>
+    <strong> {{act.user?.username || 'Someone' }} </strong>
+    {{ act.action }}
+    <small> ({{ act.created_at | date:'short' }}) </small>
+  </p>
+</div>
