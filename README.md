@@ -1,48 +1,76 @@
-# Collaborative Board API
+# AsynColl - Asynchronous Collaborative Board
 
-A Django Rest Framework backend for a collaborative kanban-style board application.
+A full-stack collaborative kanban-style project management application built with **Django REST Framework** (backend) and **Angular 19** (frontend).
+
+## Overview
+
+AsynColl enables teams to collaborate on projects in real-time by organizing tasks into boards, lists, and cards—similar to Trello or Jira. The application provides an intuitive interface for managing workflows and tracking project progress.
 
 ## Features
 
-- **Boards**: Create and manage project boards.
-- **Lists**: Group tasks into lists within a specific board.
-- **Cards**: Tasks that belong to a list, with customizable positions and descriptions.
-- **Card Movement**: Easily move cards between different lists or reorder them within the same list.
-- **Optimized Queries**: Advanced query filtering and `prefetch_related` built into the API to avoid N+1 query problems.
+- **Boards**: Create and manage project boards for different projects or teams
+- **Lists**: Organize tasks into customizable lists (e.g., To-Do, In Progress, Done)
+- **Cards**: Task cards with titles, descriptions, assignments, and positional ordering
+- **Card Movement**: Drag-and-drop cards between lists or reorder within lists
+- **User Assignments**: Assign cards to team members for better task ownership
+- **Optimized Performance**: Advanced query filtering with `prefetch_related` to prevent N+1 database queries
+- **RESTful API**: Comprehensive REST API endpoints for all operations
 
-## Models
+## 📸 Application Snapshot
 
-- **Board**: Has a `name` and belongs to an `owner` (User).
-- **List**: Has a `name` and belongs to a `board` (Foreign Key).
-- **Card**: Has a `title`, `description`, `position` (integer for ordering), and belongs to a `list` (Foreign Key). Cards can also be `assigned_to` a User.
+> [Screenshot placeholder - Add a screenshot of the main board view here]
 
-## API Endpoints
+## Architecture
 
-The core resources are registered under `/api/`:
+### Backend
+- **Framework**: Django REST Framework
+- **Database**: SQLite (configurable for PostgreSQL/MySQL)
+- **Python Version**: 3.8+
+
+### Frontend
+- **Framework**: Angular 19
+- **Build Tool**: Angular CLI
+- **Styling**: CSS/Bootstrap
+
+## Data Models
+
+- **Board**: Contains a `name` and belongs to an `owner` (User). The top-level container for all project work.
+- **List**: Contains a `name` and belongs to a `board` (Foreign Key). Used to organize cards into workflow stages.
+- **Card**: Contains `title`, `description`, `position` (integer for ordering), and belongs to a `list` (Foreign Key). Can be `assigned_to` a User for task ownership.
+
+## 🚀 API Endpoints
+
+All core resources are available under the `/api/` endpoint.
 
 ### Boards
-- `GET /api/boards/` - List all boards
-- `POST /api/boards/` - Create a board
-- `GET /api/boards/{id}/` - Retrieve board details
-- `PUT/PATCH /api/boards/{id}/` - Update a board
-- `DELETE /api/boards/{id}/` - Delete a board
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/boards/` | List all boards |
+| POST | `/api/boards/` | Create a new board |
+| GET | `/api/boards/{id}/` | Retrieve a specific board |
+| PUT/PATCH | `/api/boards/{id}/` | Update a board |
+| DELETE | `/api/boards/{id}/` | Delete a board |
 
 ### Lists
-- `GET /api/lists/` - List all lists
-- `GET /api/lists/?board={id}` - Filter lists by a specific board
-- `POST /api/lists/` - Create a list
-- `GET /api/lists/{id}/` - Retrieve list details
-- `PUT/PATCH /api/lists/{id}/` - Update a list
-- `DELETE /api/lists/{id}/` - Delete a list
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/lists/` | List all lists |
+| GET | `/api/lists/?board={id}` | Filter lists by board |
+| POST | `/api/lists/` | Create a new list |
+| GET | `/api/lists/{id}/` | Retrieve a specific list |
+| PUT/PATCH | `/api/lists/{id}/` | Update a list |
+| DELETE | `/api/lists/{id}/` | Delete a list |
 
 ### Cards
-- `GET /api/cards/` - List all cards
-- `GET /api/cards/?list={id}` - Filter cards by a specific list
-- `GET /api/cards/?board={id}` - Filter cards across an entire board
-- `POST /api/cards/` - Create a new card
-- `GET /api/cards/{id}/` - Retrieve card details
-- `PUT/PATCH /api/cards/{id}/` - Update a card (including moving lists or changing `position`)
-- `DELETE /api/cards/{id}/` - Delete a card
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/cards/` | List all cards |
+| GET | `/api/cards/?list={id}` | Filter cards by list |
+| GET | `/api/cards/?board={id}` | Filter cards by board |
+| POST | `/api/cards/` | Create a new card |
+| GET | `/api/cards/{id}/` | Retrieve a specific card |
+| PUT/PATCH | `/api/cards/{id}/` | Update a card (move between lists, change position, etc.) |
+| DELETE | `/api/cards/{id}/` | Delete a card |
 
 ## Error Handling
 
