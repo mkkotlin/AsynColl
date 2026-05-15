@@ -18,6 +18,10 @@ export class ApiService {
     return this.http.patch(`${this.baseUrl}/cards/${id}/`, data);
   }
 
+  createCard(data: any) {
+    return this.http.post(`${this.baseUrl}/cards/`, data);
+  }
+
   // 🔥 NEW
   reorderList(listId: number, cardIds: number[]) {
     return this.http.post(

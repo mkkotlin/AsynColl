@@ -52,6 +52,20 @@
 
     </div>
 
+    <div class="add-card-container">
+      <input 
+        #newCardInput 
+        type="text" 
+        placeholder="+ Add a card..." 
+        class="add-card-input" 
+        (keydown.enter)="createCard(list.id, newCardInput.value, newCardInput)"
+      >
+      <button 
+        class="add-card-btn" 
+        (click)="createCard(list.id, newCardInput.value, newCardInput)"
+      >Add</button>
+    </div>
+
   </div>
 
 </div>

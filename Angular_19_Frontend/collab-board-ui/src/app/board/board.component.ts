@@ -57,7 +57,7 @@ export class BoardComponent implements OnInit, OnDestroy {
     this.socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
 
-      if (data.action === 'CARD_MOVED' || data.action === 'CARD_ASSIGNED') {
+      if (data.action === 'CARD_MOVED' || data.action === 'CARD_ASSIGNED' || data.action === 'CARD_CREATED') {
         this.loadBoard();
       }
     };
@@ -139,5 +139,12 @@ export class BoardComponent implements OnInit, OnDestroy {
     this.router.navigate(['/login']);
   }
 
-
+  createCard(listId: number, title: string, inputElement: HTMLInputElement) {
+    if (!title.trim()) return;
+    this.api.createCard({ list: listId, title: title.trim() }).subscribe(() => {
+      inputElement.value = '';
+      this.socket.send(JSON.stringify({ action: 'CARD_CREATED' }));
+      this.loadBoard();
+    });
+  }
 }

@@ -137,6 +137,49 @@
   font-weight: 500;
 }
 
+/* 🔹 Add Card */
+.add-card-container {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.add-card-input {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: rgba(0, 0, 0, 0.05);
+  outline: none;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.add-card-input:focus {
+  background: white;
+  border-color: #4c9aff;
+  box-shadow: 0 0 0 2px rgba(76, 154, 255, 0.2);
+}
+
+.add-card-btn {
+  background: #4c9aff;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.add-card-btn:hover {
+  background: #2684ff;
+}
+
+.add-card-btn:active {
+  transform: scale(0.96);
+}
+
 /* 🔹 Select */
 .assign-select {
   width: 100%;
