@@ -36,6 +36,12 @@ DEBUG = env("DEBUG")
 ALLOWED_HOSTS = []
 
 
+# REST AUTHENTICATION
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': ( 'rest_framework_simplejwt.authentication.JWTAuthentication', ),
+}
+
+
 # Application definition
 
 INSTALLED_APPS = [

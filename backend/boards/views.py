@@ -4,17 +4,20 @@ from rest_framework.response import Response
 from .models import Board, List, Card, ActivityLog
 from .serializers import BoardSerializer, ListSerializer, CardSerializer, UserSerializer
 from django.contrib.auth.models import User
+from rest_framework.permissions import IsAuthenticated
 
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    permission_class = [IsAuthenticated]
     
 
 
 class BoardViewSet(viewsets.ModelViewSet):
     queryset = Board.objects.all()
     serializer_class = BoardSerializer
+    permission_class = [IsAuthenticated]
 
     def get_queryset(self):
         return Board.objects.prefetch_related('lists__cards', 'activities')
@@ -23,6 +26,7 @@ class BoardViewSet(viewsets.ModelViewSet):
 class ListViewSet(viewsets.ModelViewSet):
     queryset = List.objects.all()
     serializer_class = ListSerializer
+    permission_class = [IsAuthenticated]
 
     # 🔥 REORDER API
     @action(detail=True, methods=['post'])
@@ -38,6 +42,7 @@ class ListViewSet(viewsets.ModelViewSet):
 class CardViewSet(viewsets.ModelViewSet):
     queryset = Card.objects.all()
     serializer_class = CardSerializer
+    permission_class = [IsAuthenticated]
 
 
     def partial_update(self, request, *args, **kwargs):
@@ -65,7 +70,7 @@ class CardViewSet(viewsets.ModelViewSet):
             ActivityLog.objects.create(
                 board=card.list.board,
                 user=user,
-                action=f"{user} moved '{card.title}' to list {card.list.name}",
+                action=f" moved '{card.title}' to list {card.list.name}",
                 card=card
             )
 
@@ -73,7 +78,7 @@ class CardViewSet(viewsets.ModelViewSet):
             ActivityLog.objects.create(
                 board=card.list.board,
                 user=user,
-                action=f"{user} assigned '{card.title}'",
+                action=f" assigned '{card.title}'",
                 card=card
             )
 

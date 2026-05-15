@@ -28,4 +28,8 @@ export class ApiService {
   getUser(){
     return this.http.get(`${this.baseUrl}/users/`);
   }
+
+  login(data:any){
+    return this.http.post(`${this.baseUrl}/token/`, data);
+  }
 }

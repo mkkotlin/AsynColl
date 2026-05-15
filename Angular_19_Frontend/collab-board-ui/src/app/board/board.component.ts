@@ -24,9 +24,20 @@ export class BoardComponent implements OnInit, OnDestroy {
 constructor(private api: ApiService) {}
 
   ngOnInit(): void {
-    this.connectWebSocket();
+    // this.connectWebSocket();
+    // this.loadBoard();
+    // this.loadUsers();
+    this.api.login({
+      username: 'mayank',
+      password:'mayank'
+    }).subscribe((res: any)=>{
+      localStorage.setItem('access', res.access);
+      localStorage.setItem('refresh', res.refresh);
+      console.log('JWT stored');
+          this.connectWebSocket();
     this.loadBoard();
     this.loadUsers();
+    })
   }
 
   ngOnDestroy(): void {

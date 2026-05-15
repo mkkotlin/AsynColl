@@ -21,7 +21,7 @@ class ListSerializer(serializers.ModelSerializer):
         fields = '__all__'  
 
 class ActivityLogSerializer(serializers.ModelSerializer):
-    user = UserSerializer
+    user = UserSerializer(read_only=True)
 
     class Meta:
         model = ActivityLog
