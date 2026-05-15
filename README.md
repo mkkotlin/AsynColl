@@ -18,7 +18,7 @@ AsynColl enables teams to collaborate on projects in real-time by organizing tas
 
 ## 📸 Application Snapshot
 
-> [Screenshot placeholder - Add a screenshot of the main board view here]
+
 ![Dashboard](image.png)
 ![Activity Log](image-1.png)
 
