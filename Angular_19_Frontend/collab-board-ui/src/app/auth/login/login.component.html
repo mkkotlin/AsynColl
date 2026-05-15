@@ -1,23 +1,13 @@
 <h2>Login</h2>
 
-<input
-  type="text"
-  [(ngModel)]="username"
-  placeholder="Username"
-/>
+<input type="text" [(ngModel)]="username" placeholder="Username" />
 
-<br><br>
+<br /><br />
 
-<input
-  type="password"
-  [(ngModel)]="password"
-  placeholder="Password"
-/>
+<input type="password" [(ngModel)]="password" placeholder="Password" />
 
-<br><br>
+<br /><br />
 
-<button (click)="login()">
-  Login
-</button>
+<button (click)="login()">Login</button>
 
-<p class="auth-link">Don't have account?<a routerLink="/register">Click here to register</a></p>
+<p class="auth-link">Don't have an account? <a routerLink="/register">Click here to register</a></p>

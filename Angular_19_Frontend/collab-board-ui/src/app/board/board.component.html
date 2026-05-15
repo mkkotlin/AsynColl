@@ -1,96 +1,68 @@
 <div class="topbar">
   <h1>{{ board?.name }}</h1>
-
-  <button class="logout-btn" (click)="logout()">
-    Logout
-  </button>
+  <button class="logout-btn" (click)="logout()">Logout</button>
 </div>
 
 <div class="board-container">
-
+  <!-- List columns with drag-drop support -->
   <div
     class="list"
     *ngFor="let list of board?.lists"
-
     cdkDropList
     [id]="'list-' + list.id"
     [cdkDropListData]="list.cards"
     [cdkDropListConnectedTo]="connectedLists"
     (cdkDropListDropped)="drop($event, list)"
   >
-
     <h3>{{ list.name }}</h3>
 
-    <div
-      class="card"
-      *ngFor="let card of list.cards"
-      cdkDrag
-    >
+    <!-- Cards in list -->
+    <div class="card" *ngFor="let card of list.cards" cdkDrag>
+      <p class="card-title">{{ card.title }}</p>
 
-      <p class="card-title">
-        {{ card.title }}
-      </p>
-
+      <!-- Display assigned user -->
       <small *ngIf="card.assigned_to">
         Assigned: {{ card.assigned_to.username }}
       </small>
 
-      <select
-        class="assign-select"
-        (change)="assignUser(card, $event)"
-      >
+      <!-- Assign user dropdown -->
+      <select class="assign-select" (change)="assignUser(card, $event)">
         <option value="">Assign User</option>
-
-        <option
-          *ngFor="let user of users"
-          [value]="user.id"
-        >
+        <option *ngFor="let user of users" [value]="user.id">
           {{ user.username }}
         </option>
-
       </select>
-
     </div>
 
+    <!-- Add card form -->
     <div class="add-card-container">
-      <input 
-        #newCardInput 
-        type="text" 
-        placeholder="+ Add a card..." 
-        class="add-card-input" 
+      <input
+        #newCardInput
+        type="text"
+        placeholder="+ Add a card..."
+        class="add-card-input"
         (keydown.enter)="createCard(list.id, newCardInput.value, newCardInput)"
-      >
-      <button 
-        class="add-card-btn" 
+      />
+      <button
+        class="add-card-btn"
         (click)="createCard(list.id, newCardInput.value, newCardInput)"
-      >Add</button>
+      >
+        Add
+      </button>
     </div>
-
   </div>
-
 </div>
 
-<hr>
+<hr />
 
+<!-- Activity feed -->
 <div class="activity-section">
-
   <h2>Activity Log</h2>
-
-  <div
-    class="activity-item"
-    *ngFor="let act of board?.activities"
-  >
-
-    <strong>
-      {{ act.user?.username || 'Unknown' }}
-    </strong>
-
+  <div class="activity-item" *ngFor="let act of board?.activities">
+    <strong>{{ act.user?.username || 'Unknown' }}</strong>
     {{ act.action }}
-
     <div class="timestamp">
-      {{ act.created_at | date:'short' }}
+      {{ act.created_at | date: 'short' }}
     </div>
-
   </div>
-
 </div>

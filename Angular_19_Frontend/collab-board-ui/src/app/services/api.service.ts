@@ -5,38 +5,39 @@ import { Injectable } from '@angular/core';
   providedIn: 'root'
 })
 export class ApiService {
-
   private baseUrl = 'http://127.0.0.1:8000/api';
 
   constructor(private http: HttpClient) {}
 
+  // Board operations
   getBoard(id: number) {
     return this.http.get(`${this.baseUrl}/boards/${id}/`);
   }
 
-  updateCard(id: number, data: any) {
-    return this.http.patch(`${this.baseUrl}/cards/${id}/`, data);
+  // Card CRUD operations
+  getUser() {
+    return this.http.get(`${this.baseUrl}/users/`);
   }
 
   createCard(data: any) {
     return this.http.post(`${this.baseUrl}/cards/`, data);
   }
 
-  // 🔥 NEW
-  reorderList(listId: number, cardIds: number[]) {
-    return this.http.post(
-      `${this.baseUrl}/lists/${listId}/reorder/`,
-      { card_ids: cardIds }
-    );
-  }
-  getUser(){
-    return this.http.get(`${this.baseUrl}/users/`);
+  updateCard(id: number, data: any) {
+    return this.http.patch(`${this.baseUrl}/cards/${id}/`, data);
   }
 
-  login(data:any){
+  // List reordering for drag-drop
+  reorderList(listId: number, cardIds: number[]) {
+    return this.http.post(`${this.baseUrl}/lists/${listId}/reorder/`, { card_ids: cardIds });
+  }
+
+  // Authentication
+  login(data: any) {
     return this.http.post(`${this.baseUrl}/token/`, data);
   }
-  register(data: any){
-    return this.http.post(`${this.baseUrl}/register/`, data)
+
+  register(data: any) {
+    return this.http.post(`${this.baseUrl}/register/`, data);
   }
 }

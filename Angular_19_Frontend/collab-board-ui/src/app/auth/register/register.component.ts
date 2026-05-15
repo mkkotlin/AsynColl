@@ -10,25 +10,15 @@ import { Router } from '@angular/router';
   templateUrl: './register.component.html'
 })
 export class RegisterComponent {
-
   username = '';
   password = '';
 
-  constructor(
-    private api: ApiService,
-    private router: Router
-  ) {}
+  constructor(private api: ApiService, private router: Router) {}
 
-  register() {
-
-    this.api.register({
-      username: this.username,
-      password: this.password
-    }).subscribe(() => {
-
+  // Create new user account and redirect to login
+  register(): void {
+    this.api.register({ username: this.username, password: this.password }).subscribe(() => {
       this.router.navigate(['/login']);
-
     });
-
   }
 }

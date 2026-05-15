@@ -17,13 +17,12 @@ import { CommonModule } from '@angular/common';
   styleUrl: './board.component.css'
 })
 export class BoardComponent implements OnInit, OnDestroy {
-
   board: any;
   connectedLists: string[] = [];
   users: any[] = [];
   private socket!: WebSocket;
 
-  constructor(private api: ApiService, private router: Router) { }
+  constructor(private api: ApiService, private router: Router) {}
 
   ngOnInit(): void {
     this.connectWebSocket();
@@ -35,59 +34,45 @@ export class BoardComponent implements OnInit, OnDestroy {
     this.socket?.close();
   }
 
-  loadBoard() {
+  // Fetch board data and map list IDs for drag-drop connectivity
+  loadBoard(): void {
     this.api.getBoard(1).subscribe((data: any) => {
       this.board = data;
-
-      this.connectedLists = this.board.lists.map(
-        (list: any) => 'list-' + list.id
-      );
+      this.connectedLists = this.board.lists.map((list: any) => 'list-' + list.id);
     });
   }
 
-  loadUsers() {
+  // Fetch all available users for assignment dropdown
+  loadUsers(): void {
     this.api.getUser().subscribe((data: any) => {
       this.users = data;
-    })
+    });
   }
 
-  connectWebSocket() {
+  // Connect WebSocket for real-time updates
+  connectWebSocket(): void {
     this.socket = new WebSocket('ws://127.0.0.1:8000/ws/board/1/');
-
     this.socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
-
-      if (data.action === 'CARD_MOVED' || data.action === 'CARD_ASSIGNED' || data.action === 'CARD_CREATED') {
+      if (['CARD_MOVED', 'CARD_ASSIGNED', 'CARD_CREATED'].includes(data.action)) {
         this.loadBoard();
       }
     };
   }
 
-  // 🔥 FINAL DROP LOGIC
-  drop(event: CdkDragDrop<any[]>, targetList: any) {
-
+  // Handle card drag-drop: same list reorder or cross-list move
+  drop(event: CdkDragDrop<any[]>, targetList: any): void {
     const previousListId = event.previousContainer.id.split('-')[1];
-    const currentListId = event.container.id.split('-')[1];
 
     if (event.previousContainer === event.container) {
-
-      // Same list reorder
-      moveItemInArray(
-        event.container.data,
-        event.previousIndex,
-        event.currentIndex
-      );
-
-      const updatedCards = event.container.data;
-      const cardIds = updatedCards.map((c: any) => c.id);
-
+      // Same list: reorder cards
+      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+      const cardIds = event.container.data.map((c: any) => c.id);
       this.api.reorderList(targetList.id, cardIds).subscribe(() => {
         this.socket.send(JSON.stringify({ action: 'CARD_MOVED' }));
       });
-
     } else {
-
-      // Cross list move
+      // Different list: move and reorder both lists
       transferArrayItem(
         event.previousContainer.data,
         event.container.data,
@@ -96,50 +81,38 @@ export class BoardComponent implements OnInit, OnDestroy {
       );
 
       const movedCard = event.container.data[event.currentIndex];
+      this.api.updateCard(movedCard.id, { list: targetList.id }).subscribe(() => {
+        const sourceCardIds = event.previousContainer.data.map((c: any) => c.id);
+        const targetCardIds = event.container.data.map((c: any) => c.id);
 
-      // Update card list
-      this.api.updateCard(movedCard.id, {
-        list: targetList.id
-      }).subscribe(() => {
-
-        const sourceCards = event.previousContainer.data;
-        const targetCards = event.container.data;
-
-        // Reorder both lists
-        this.api.reorderList(+previousListId, sourceCards.map(c => c.id)).subscribe();
-        this.api.reorderList(targetList.id, targetCards.map(c => c.id)).subscribe(() => {
-
+        this.api.reorderList(+previousListId, sourceCardIds).subscribe();
+        this.api.reorderList(targetList.id, targetCardIds).subscribe(() => {
           this.socket.send(JSON.stringify({ action: 'CARD_MOVED' }));
-
         });
-
       });
     }
   }
 
-  assignUser(card: any, event: Event) {
+  // Assign card to selected user
+  assignUser(card: any, event: Event): void {
     const select = event.target as HTMLSelectElement;
-    const userId = Number(select.value)
-    console.log('Assign clicked')
-    this.api.updateCard(card.id, {
-      assigned_to_id: userId
-    }).subscribe(() => {
-      console.log('api response')
-      this.socket.send(JSON.stringify({
-        action: "CARD_ASSIGNED",
-        cardId: card.id,
-        userId: userId
-      }))
-    })
+    const userId = Number(select.value);
+
+    this.api.updateCard(card.id, { assigned_to_id: userId }).subscribe(() => {
+      this.socket.send(JSON.stringify({ action: 'CARD_ASSIGNED', cardId: card.id, userId }));
+    });
   }
-  logout(){
+
+  // Clear auth tokens and navigate to login
+  logout(): void {
     localStorage.removeItem('access');
     localStorage.removeItem('refresh');
     this.socket.close();
     this.router.navigate(['/login']);
   }
 
-  createCard(listId: number, title: string, inputElement: HTMLInputElement) {
+  // Create new card in list
+  createCard(listId: number, title: string, inputElement: HTMLInputElement): void {
     if (!title.trim()) return;
     this.api.createCard({ list: listId, title: title.trim() }).subscribe(() => {
       inputElement.value = '';
