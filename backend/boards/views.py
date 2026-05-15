@@ -206,6 +206,54 @@ class CardViewSet(viewsets.ModelViewSet):
     serializer_class = CardSerializer
     permission_classes = [IsAuthenticated]
 
+    def create(self, request, *args, **kwargs):
+        """
+        Create a new card and log the activity.
+        
+        When a card is created, an activity log entry is automatically
+        generated to record who created the card.
+        
+        Request Body:
+            {
+                "title": "New Task",
+                "description": "Optional description",
+                "list": 5
+            }
+        
+        Process:
+        1. Call parent create() to create card in database
+        2. Get authenticated user
+        3. Create ActivityLog entry for card creation
+        4. Return created card data
+        
+        Args:
+            request: HTTP POST request with card data
+            *args: Additional positional arguments
+            **kwargs: URL keyword arguments
+        
+        Returns:
+            Response: Serialized created card data with 201 status
+        """
+        # Create the card using parent's create method
+        response = super().create(request, *args, **kwargs)
+        
+        # Get the authenticated user
+        user = request.user if request.user.is_authenticated else None
+        
+        # Get the created card from response data
+        card_id = response.data.get('id')
+        card = Card.objects.get(id=card_id)
+        
+        # Log card creation
+        ActivityLog.objects.create(
+            board=card.list.board,
+            user=user,
+            action=f"created card '{card.title}'",
+            card=card
+        )
+        
+        return response
+
     def partial_update(self, request, *args, **kwargs):
         """
         Handle partial card updates with automatic activity logging.
@@ -280,10 +328,14 @@ class CardViewSet(viewsets.ModelViewSet):
 
         # Log card assignment for audit trail
         if new_assigned is not None:
+            assigned_user = User.objects.get(id=new_assigned) if new_assigned else None
+            assigned_username = assigned_user.username if assigned_user else "unassigned"
+            user_who_assigned = user.username if user else "Unknown user"
+            
             ActivityLog.objects.create(
                 board=card.list.board,
                 user=user,
-                action=f"assigned '{card.title}'",
+                action=f"{user_who_assigned} assigned '{card.title}' to {assigned_username}",
                 card=card
             )
 

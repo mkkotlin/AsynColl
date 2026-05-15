@@ -37,7 +37,7 @@
 
       <select
         class="assign-select"
-        (change)="assignUser(card, $any($event.target).value)"
+        (change)="assignUser(card, $event)"
       >
         <option value="">Assign User</option>
 
