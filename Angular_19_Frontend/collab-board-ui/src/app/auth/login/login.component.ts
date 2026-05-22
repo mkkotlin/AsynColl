@@ -20,7 +20,10 @@ export class LoginComponent {
     this.api.login({ username: this.username, password: this.password }).subscribe((res: any) => {
       localStorage.setItem('access', res.access);
       localStorage.setItem('refresh', res.refresh);
+      // for username
+      localStorage.setItem('username',this.username)
       this.router.navigate(['/board']);
+      // console.log(localStorage.getItem('username'))
     });
   }
 }

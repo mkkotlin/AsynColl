@@ -21,6 +21,8 @@ export class BoardComponent implements OnInit, OnDestroy {
   connectedLists: string[] = [];
   users: any[] = [];
   private socket!: WebSocket;
+  loggedInUser = localStorage.getItem('username');
+ 
 
   constructor(private api: ApiService, private router: Router) {}
 
