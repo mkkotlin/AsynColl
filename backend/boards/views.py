@@ -26,6 +26,8 @@ from .models import Board, List, Card, ActivityLog
 from .serializers import BoardSerializer, ListSerializer, CardSerializer, UserSerializer
 from django.contrib.auth.models import User
 from rest_framework.permissions import IsAuthenticated
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
@@ -251,7 +253,21 @@ class CardViewSet(viewsets.ModelViewSet):
             action=f"created card '{card.title}'",
             card=card
         )
-        
+
+        # Push real-time update to all WebSocket clients on this board
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            f'board_{card.list.board.id}',
+            {
+                'type': 'board_update',
+                'message': {
+                    'action': 'CARD_CREATED',
+                    'card_id': card.id,
+                    'board_id': card.list.board.id,
+                }
+            }
+        )
+
         return response
 
     def partial_update(self, request, *args, **kwargs):
@@ -317,6 +333,9 @@ class CardViewSet(viewsets.ModelViewSet):
         # Persist changes to database
         card.save()
 
+        channel_layer = get_channel_layer()
+        board_id = card.list.board.id
+
         # Log card movement to activity log for audit trail
         if new_list:
             ActivityLog.objects.create(
@@ -324,6 +343,18 @@ class CardViewSet(viewsets.ModelViewSet):
                 user=user,              # User who made the change
                 action=f"moved '{card.title}' to list {card.list.name}",
                 card=card
+            )
+            # Push CARD_MOVED to all WebSocket clients on this board
+            async_to_sync(channel_layer.group_send)(
+                f'board_{board_id}',
+                {
+                    'type': 'board_update',
+                    'message': {
+                        'action': 'CARD_MOVED',
+                        'card_id': card.id,
+                        'board_id': board_id,
+                    }
+                }
             )
 
         # Log card assignment for audit trail
@@ -337,6 +368,18 @@ class CardViewSet(viewsets.ModelViewSet):
                 user=user,
                 action=f"{user_who_assigned} assigned '{card.title}' to {assigned_username}",
                 card=card
+            )
+            # Push CARD_ASSIGNED to all WebSocket clients on this board
+            async_to_sync(channel_layer.group_send)(
+                f'board_{board_id}',
+                {
+                    'type': 'board_update',
+                    'message': {
+                        'action': 'CARD_ASSIGNED',
+                        'card_id': card.id,
+                        'board_id': board_id,
+                    }
+                }
             )
 
         # Return the updated card with all fields populated

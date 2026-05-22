@@ -1,20 +1,19 @@
-  <h2 style="padding:10px;">Hello, <a style="text-transform: uppercase; background: linear-gradient(135deg, #ff0000 0%, #8E54E9 100%);"> {{ loggedInUser }}</a> </h2>
+<h2 style="padding:10px;">Hello, <a
+    style="text-transform: uppercase; background: linear-gradient(135deg, #ff0000 0%, #8E54E9 100%);"> {{ loggedInUser
+    }}</a> </h2>
 <div class="topbar">
-  <h1>{{ board?.name }}</h1>
+  <select (change)="onBoardChange($event)">
+    <option>Select Board</option>
+    <option *ngFor="let b of boards" [value]="b.id">{{b.name}}</option>
+  </select>
+  <!-- <h1>{{ board?.name }}</h1> -->
   <button class="logout-btn" (click)="logout()">Logout</button>
 </div>
 
 <div class="board-container">
   <!-- List columns with drag-drop support -->
-  <div
-    class="list"
-    *ngFor="let list of board?.lists"
-    cdkDropList
-    [id]="'list-' + list.id"
-    [cdkDropListData]="list.cards"
-    [cdkDropListConnectedTo]="connectedLists"
-    (cdkDropListDropped)="drop($event, list)"
-  >
+  <div class="list" *ngFor="let list of board?.lists" cdkDropList [id]="'list-' + list.id"
+    [cdkDropListData]="list.cards" [cdkDropListConnectedTo]="connectedLists" (cdkDropListDropped)="drop($event, list)">
     <h3>{{ list.name }}</h3>
 
     <!-- Cards in list -->
@@ -37,17 +36,9 @@
 
     <!-- Add card form -->
     <div class="add-card-container">
-      <input
-        #newCardInput
-        type="text"
-        placeholder="+ Add a card..."
-        class="add-card-input"
-        (keydown.enter)="createCard(list.id, newCardInput.value, newCardInput)"
-      />
-      <button
-        class="add-card-btn"
-        (click)="createCard(list.id, newCardInput.value, newCardInput)"
-      >
+      <input #newCardInput type="text" placeholder="+ Add a card..." class="add-card-input"
+        (keydown.enter)="createCard(list.id, newCardInput.value, newCardInput)" />
+      <button class="add-card-btn" (click)="createCard(list.id, newCardInput.value, newCardInput)">
         Add
       </button>
     </div>

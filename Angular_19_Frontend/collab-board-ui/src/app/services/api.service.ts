@@ -10,6 +10,10 @@ export class ApiService {
   constructor(private http: HttpClient) {}
 
   // Board operations
+  getBoards() {
+    return this.http.get(`${this.baseUrl}/boards/`);
+  }
+
   getBoard(id: number) {
     return this.http.get(`${this.baseUrl}/boards/${id}/`);
   }

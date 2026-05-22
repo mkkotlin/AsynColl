@@ -18,17 +18,20 @@ import { CommonModule } from '@angular/common';
 })
 export class BoardComponent implements OnInit, OnDestroy {
   board: any;
+  boards: any[] = [];   // list of all boards for the dropdown
+  currentBoardId: number = 1;  // tracks which board is active
   connectedLists: string[] = [];
   users: any[] = [];
   private socket!: WebSocket;
   loggedInUser = localStorage.getItem('username');
- 
 
-  constructor(private api: ApiService, private router: Router) {}
+
+  constructor(private api: ApiService, private router: Router) { }
 
   ngOnInit(): void {
     this.connectWebSocket();
-    this.loadBoard();
+    this.loadBoards();   // populate dropdown first
+    this.loadBoard(1);
     this.loadUsers();
   }
 
@@ -36,9 +39,31 @@ export class BoardComponent implements OnInit, OnDestroy {
     this.socket?.close();
   }
 
+  // Fetch all boards for the selector dropdown
+  loadBoards(): void {
+    this.api.getBoards().subscribe((data: any) => {
+      this.boards = data;
+    });
+  }
+
+  // Bridge between template event and loadBoard (cast not allowed in Angular templates)
+  onBoardChange(event: Event): void {
+    const id = Number((event.target as HTMLSelectElement).value);
+    if (!id) return;
+    this.currentBoardId = id;
+    // Reconnect WebSocket to the newly selected board
+    if (this.socket && this.socket.readyState !== WebSocket.CLOSED) {
+      this.socket.onclose = () => this.connectWebSocket();
+      this.socket.close();
+    } else {
+      this.connectWebSocket();
+    }
+    this.loadBoard(id);
+  }
+
   // Fetch board data and map list IDs for drag-drop connectivity
-  loadBoard(): void {
-    this.api.getBoard(1).subscribe((data: any) => {
+  loadBoard(boardId: number | string): void {
+    this.api.getBoard(+boardId).subscribe((data: any) => {
       this.board = data;
       this.connectedLists = this.board.lists.map((list: any) => 'list-' + list.id);
     });
@@ -53,11 +78,12 @@ export class BoardComponent implements OnInit, OnDestroy {
 
   // Connect WebSocket for real-time updates
   connectWebSocket(): void {
-    this.socket = new WebSocket('ws://127.0.0.1:8000/ws/board/1/');
+    this.socket = new WebSocket(`ws://127.0.0.1:8000/ws/board/${this.currentBoardId}/`);
     this.socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
       if (['CARD_MOVED', 'CARD_ASSIGNED', 'CARD_CREATED'].includes(data.action)) {
-        this.loadBoard();
+        // Reload current board so activity log and card state are both fresh
+        this.loadBoard(this.currentBoardId);
       }
     };
   }
@@ -70,9 +96,7 @@ export class BoardComponent implements OnInit, OnDestroy {
       // Same list: reorder cards
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
       const cardIds = event.container.data.map((c: any) => c.id);
-      this.api.reorderList(targetList.id, cardIds).subscribe(() => {
-        this.socket.send(JSON.stringify({ action: 'CARD_MOVED' }));
-      });
+      this.api.reorderList(targetList.id, cardIds).subscribe();
     } else {
       // Different list: move and reorder both lists
       transferArrayItem(
@@ -89,7 +113,7 @@ export class BoardComponent implements OnInit, OnDestroy {
 
         this.api.reorderList(+previousListId, sourceCardIds).subscribe();
         this.api.reorderList(targetList.id, targetCardIds).subscribe(() => {
-          this.socket.send(JSON.stringify({ action: 'CARD_MOVED' }));
+          // Backend now pushes CARD_MOVED via channel_layer — no need to send from client
         });
       });
     }
@@ -101,7 +125,7 @@ export class BoardComponent implements OnInit, OnDestroy {
     const userId = Number(select.value);
 
     this.api.updateCard(card.id, { assigned_to_id: userId }).subscribe(() => {
-      this.socket.send(JSON.stringify({ action: 'CARD_ASSIGNED', cardId: card.id, userId }));
+      // Backend now pushes CARD_ASSIGNED via channel_layer — no need to send from client
     });
   }
 
@@ -118,8 +142,7 @@ export class BoardComponent implements OnInit, OnDestroy {
     if (!title.trim()) return;
     this.api.createCard({ list: listId, title: title.trim() }).subscribe(() => {
       inputElement.value = '';
-      this.socket.send(JSON.stringify({ action: 'CARD_CREATED' }));
-      this.loadBoard();
+      // Backend now pushes CARD_CREATED via channel_layer — no need to send from client
     });
   }
 }
