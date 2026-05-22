@@ -28,6 +28,7 @@ from django.contrib.auth.models import User
 from rest_framework.permissions import IsAuthenticated
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
+from django.db.models import Prefetch
 
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
@@ -95,7 +96,10 @@ class BoardViewSet(viewsets.ModelViewSet):
         Returns:
             QuerySet: Board objects with optimized related data loading
         """
-        return Board.objects.prefetch_related('lists__cards', 'activities')
+        return Board.objects.prefetch_related(
+            'lists__cards',
+            Prefetch('activities', queryset=ActivityLog.objects.order_by('-created_at').select_related('user'))
+        )
 
 
 class ListViewSet(viewsets.ModelViewSet):
@@ -316,6 +320,9 @@ class CardViewSet(viewsets.ModelViewSet):
         # Fetch the card being updated
         card = self.get_object()
         
+        # Capture board_id BEFORE modifying the card to avoid stale relation cache
+        board_id = card.list.board.id
+        
         # Get the authenticated user making this change (or None if unauthenticated)
         user = request.user if request.user.is_authenticated else None
 
@@ -332,19 +339,19 @@ class CardViewSet(viewsets.ModelViewSet):
 
         # Persist changes to database
         card.save()
-
-        channel_layer = get_channel_layer()
-        board_id = card.list.board.id
+        # Refresh from DB so card.list/card.list.name reflect the new state
+        card.refresh_from_db()
 
         # Log card movement to activity log for audit trail
         if new_list:
             ActivityLog.objects.create(
-                board=card.list.board,  # Get board from current list
-                user=user,              # User who made the change
-                action=f"moved '{card.title}' to list {card.list.name}",
+                board_id=board_id,  # Use pre-captured board_id (safe)
+                user=user,
+                action=f"moved '{card.title}' to list '{card.list.name}'",
                 card=card
             )
             # Push CARD_MOVED to all WebSocket clients on this board
+            channel_layer = get_channel_layer()
             async_to_sync(channel_layer.group_send)(
                 f'board_{board_id}',
                 {
@@ -364,12 +371,13 @@ class CardViewSet(viewsets.ModelViewSet):
             user_who_assigned = user.username if user else "Unknown user"
             
             ActivityLog.objects.create(
-                board=card.list.board,
+                board_id=board_id,  # Use pre-captured board_id (safe)
                 user=user,
                 action=f"{user_who_assigned} assigned '{card.title}' to {assigned_username}",
                 card=card
             )
             # Push CARD_ASSIGNED to all WebSocket clients on this board
+            channel_layer = get_channel_layer()
             async_to_sync(channel_layer.group_send)(
                 f'board_{board_id}',
                 {

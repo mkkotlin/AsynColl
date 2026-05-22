@@ -273,6 +273,9 @@ class ActivityLog(models.Model):
     card = models.ForeignKey(Card, on_delete=models.CASCADE, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        ordering = ['-created_at']
+
     def __str__(self):
         """String representation for admin interface and debugging."""
         return self.action
